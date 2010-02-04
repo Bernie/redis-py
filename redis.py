@@ -226,6 +226,24 @@ class Redis(object):
         >>> 
         """
         return self.send_command('MGET %s\r\n' % ' '.join(args))
+
+    def mset(self, nvpairs, preserve=False):
+        """
+        >>> r = Redis(db=9)
+        >>> r.mset({'abc':123, 'def':456})
+        'OK'
+        >>> r.mset({'ghi':789, 'jkl':123}, preserve=True)
+        1
+        >>> r.mset({'jkl':123, 'mno':456}, preserve=True)
+        0
+        """
+        if preserve: command = 'MSETNX'
+        else: command = 'MSET'
+        return self.send_command('*%s\r\n$%s\r\n%s\r\n%s\r\n' % (
+            len(nvpairs)*2+1, len(command), command, '\r\n'.join(
+                ['\r\n'.join(('$%s' % len(k), k, '$%s' % len(self._encode(v)), self._encode(v))) for k,v in nvpairs.items()]
+            )
+        ))
     
     def incr(self, name, amount=1):
         """

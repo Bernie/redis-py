@@ -804,6 +804,7 @@ class Redis(object):
         >>> 'b' in dst_set
         True
         """
+        member = self._encode(member)
         return self.send_command('SMOVE %s %s %s\r\n%s\r\n' % (
             src, dst, len(member), member
         ))
